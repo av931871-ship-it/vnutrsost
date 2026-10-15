@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Опросник эмоционального состояния и нагрузки</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 750px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      text-align: center;
+      color: #1a365d;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 25px;
+      font-size: 15px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #3182ce;
+    }
+    .instruction {
+      background: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #2b6cb0;
+    }
+    .statement-block {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+    .statement-block:hover {
+      background-color: #f7fafc;
+    }
+    .statement-block input {
+      margin-top: 3px;
+      margin-right: 12px;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    .statement-text {
+      font-size: 15px;
+      line-height: 1.4;
+      color: #2d3748;
+    }
+    .btn {
+      width: 100%;
+      background-color: #3182ce;
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 20px;
+    }
+    .btn:hover {
+      background-color: #2b6cb0;
+    }
+    .hidden {
+      display: none;
+    }
+    #result-screen {
+      text-align: center;
+      padding: 20px 10px;
+    }
+    .thanks-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #2b6cb0;
+      margin-bottom: 15px;
+    }
+    .zone-card {
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .zone-green {
+      background: #f0fff4;
+      border: 1px solid #9ae6b4;
+      color: #22543d;
+    }
+    .zone-yellow {
+      background: #fffff0;
+      border: 1px solid #fbd38d;
+      color: #744210;
+    }
+    .zone-red {
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #742a2a;
+    }
+    .loader {
+      font-size: 15px;
+      color: #718096;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Экран 1: Ввод ФИО -->
+  <div id="start-screen">
+    <h1>Опросник рабочего состояния</h1>
+    <div class="subtitle">Оценка текущей нагрузки и ресурсов</div>
+    <div class="form-group" style="margin-top: 30px;">
+      <label for="fullName">Введите ваше ФИО:</label>
+      <input type="text" id="fullName" placeholder="Иванов Иван Иванович" required>
+    </div>
+    <button class="btn" onclick="startTest()">Начать опрос</button>
+  </div>
+
+  <!-- Экран 2: Список утверждений -->
+  <div id="test-screen" class="hidden">
+    <h1>Опросник состояния</h1>
+    <div class="instruction">
+      Отметьте галочками те утверждения, которые соответствуют тому, как вы чувствуете себя <strong>сейчас</strong>. Вы можете выбрать любое количество вариантов.
+    </div>
+
+    <form id="quizForm">
+      <div id="statements-container">
+        <!-- Утверждения генерируются динамически через JS -->
+      </div>
+      <button type="button" class="btn" onclick="submitTest()">Завершить и посмотреть итоги</button>
+    </form>
+  </div>
+
+  <!-- Экран 3: Результат -->
+  <div id="result-screen" class="hidden">
+    <div class="thanks-title">Спасибо за прохождение!</div>
+    <p id="user-greeting" style="font-size: 18px; font-weight: 600; color: #4a5568;"></p>
+    
+    <div id="zone-result-card" class="zone-card">
+      <!-- Сюда подставится результат зоны -->
+    </div>
+
+    <p style="font-size: 15px; color: #4a5568; line-height: 1.5; text-align: left; background: #ebf8ff; padding: 15px; border-radius: 6px;">
+      Честный взгляд на свои реакции и ресурс — это первый и важный шаг к устойчивости, профессиональному развитию и сохранению баланса. Ваша вовлеченность очень ценна для нас!
+    </p>
+
+    <p id="sending-status" class="loader">Сохранение результатов...</p>
+  </div>
+
+</div>
+
+<script>
+  // ВСТАВЬТЕ СЮДА ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+  const WEB_APP_URL = "ВСТАВЬТЕ_СЮДА_URL_ВЕБ_ПРИЛОЖЕНИЯ";
+
+  const statements = [
+    "Я чувствую, что задач всегда больше, чем я могу реально выполнить",
+    "Даже в выходные или отпуске я мысленно «на работе»",
+    "Я часто принимаю важные решения в одиночку",
+    "Мне не с кем по-человечески обсудить свои сложности",
+    "Мои успехи и усилия воспринимаются «по умолчанию»",
+    "Я редко получаю искреннюю обратную связь о своей работе как лидера",
+    "Я раздражаюсь быстрее, чем раньше",
+    "Я теряю терпение или интерес даже к привычным задачам",
+    "Я регулярно жертрую личным временем, чтобы «разгрести» рабочее",
+    "Я почти не вижусь с семьёй или не отдыхаю без чувства вины",
+    "Мне кажется, что никто не понимает, каково это - быть руководителем",
+    "Я не могу позволить себе «слабость», даже когда тяжело",
+    "Я работаю по вечерам, выходным или постоянно на связи",
+    "Мои личные интересы и хобби ушли на второй план",
+    "Я всё реже интересуюсь, как чувствуют себя сотрудники",
+    "Иногда хочу «не видеть никого и ни с кем не говорить»",
+    "Я начинаю думать, что всё бесполезно и «ничего не поменяется»",
+    "Раньше я верил(а) в дело, а теперь - скорее работаю «по инерции»",
+    "Частые головные боли, проблемы со сном, усталость с утра",
+    "Я всё чаще чувствую «пустоту» даже после отдыха"
+  ];
+
+  let userFullName = "";
+
+  // Рендерим список утверждений при загрузке
+  window.onload = function() {
+    const container = document.getElementById("statements-container");
+    statements.forEach((text, index) => {
+      const label = document.createElement("label");
+      label.className = "statement-block";
+      label.innerHTML = `
+        <input type="checkbox" name="statement" value="${text}">
+        <span class="statement-text">${index + 1}. ${text}</span>
+      `;
+      container.appendChild(label);
+    });
+  };
+
+  function startTest() {
+    const nameInput = document.getElementById("fullName").value.trim();
+    if (!nameInput) {
+      alert("Пожалуйста, введите ваше ФИО.");
+      return;
+    }
+    userFullName = nameInput;
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("test-screen").classList.remove("hidden");
+    window.scrollTo(0, 0);
+  }
+
+  function submitTest() {
+    const checkboxes = document.querySelectorAll('input[name="statement"]:checked');
+    const checkedCount = checkboxes.length;
+    
+    let checkedStatements = [];
+    checkboxes.forEach(cb => checkedStatements.push(cb.value));
+
+    // Определение зоны
+    let zoneName = "";
+    let zoneClass = "";
+    let zoneDescription = "";
+
+    if (checkedCount >= 0 && checkedCount <= 3) {
+      zoneName = "Зелёная зона";
+      zoneClass = "zone-green";
+      zoneDescription = "<strong>0–3 ответа:</strong> Сотрудник в зелёной зоне! Поддерживайте баланс и ресурсы.";
+    } else if (checkedCount >= 4 && checkedCount <= 6) {
+      zoneName = "Жёлтая зона";
+      zoneClass = "zone-yellow";
+      zoneDescription = "<strong>4–6 ответов:</strong> Жёлтая зона. Начинается истощение — нужна профилактика и поддержка.";
+    } else {
+      zoneName = "Красная зона";
+      zoneClass = "zone-red";
+      zoneDescription = "<strong>7 и более ответов:</strong> Красная зона. Это признаки профессионального выгорания. Стоит срочно заняться собой и распределить нагрузку.";
+    }
+
+    // Показываем экран результатов
+    document.getElementById("test-screen").classList.add("hidden");
+    document.getElementById("result-screen").classList.remove("hidden");
+    document.getElementById("user-greeting").innerText = `${userFullName}, ваши результаты:`;
+    
+    const zoneCard = document.getElementById("zone-result-card");
+    zoneCard.className = `zone-card ${zoneClass}`;
+    zoneCard.innerHTML = `Вы отметили утверждений: <b>${checkedCount}</b><br><br>${zoneDescription}`;
+    
+    window.scrollTo(0, 0);
+
+    // Отправляем данные в Google Sheets
+    sendDataToGoogleSheets(userFullName, checkedCount, zoneName, checkedStatements);
+  }
+
+  function sendDataToGoogleSheets(fullName, totalCount, zone, checkedStatements) {
+    const payload = {
+      fullName: fullName,
+      totalCount: totalCount,
+      zone: zone,
+      checkedStatements: checkedStatements
+    };
+
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      document.getElementById("sending-status").innerText = "Результаты успешно сохранены в таблицу!";
+      document.getElementById("sending-status").style.color = "#38a169";
+    })
+    .catch(error => {
+      console.error("Ошибка:", error);
+      document.getElementById("sending-status").innerText = "Произошла ошибка при сохранении данных.";
+      document.getElementById("sending-status").style.color = "#e53e3e";
+    });
+  }
+</script>
+
+</body>
+</html>
